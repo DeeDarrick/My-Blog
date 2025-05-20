@@ -1,5 +1,6 @@
 package com.site.blog.my.core.controller.admin;
 
+import cn.hutool.captcha.ShearCaptcha;
 import com.site.blog.my.core.entity.AdminUser;
 import com.site.blog.my.core.service.*;
 import org.springframework.stereotype.Controller;
@@ -55,16 +56,16 @@ public class AdminController {
                         @RequestParam("password") String password,
                         @RequestParam("verifyCode") String verifyCode,
                         HttpSession session) {
-        if (StringUtils.isEmpty(verifyCode)) {
+        if (!StringUtils.hasText(verifyCode)) {
             session.setAttribute("errorMsg", "验证码不能为空");
             return "admin/login";
         }
-        if (StringUtils.isEmpty(userName) || StringUtils.isEmpty(password)) {
+        if (!StringUtils.hasText(userName) || !StringUtils.hasText(password)) {
             session.setAttribute("errorMsg", "用户名或密码不能为空");
             return "admin/login";
         }
-        String kaptchaCode = session.getAttribute("verifyCode") + "";
-        if (StringUtils.isEmpty(kaptchaCode) || !verifyCode.equals(kaptchaCode)) {
+        ShearCaptcha shearCaptcha = (ShearCaptcha) session.getAttribute("verifyCode");
+        if (shearCaptcha == null || !shearCaptcha.verify(verifyCode)) {
             session.setAttribute("errorMsg", "验证码错误");
             return "admin/login";
         }
@@ -98,7 +99,7 @@ public class AdminController {
     @ResponseBody
     public String passwordUpdate(HttpServletRequest request, @RequestParam("originalPassword") String originalPassword,
                                  @RequestParam("newPassword") String newPassword) {
-        if (StringUtils.isEmpty(originalPassword) || StringUtils.isEmpty(newPassword)) {
+        if (!StringUtils.hasText(originalPassword) || !StringUtils.hasText(newPassword)) {
             return "参数不能为空";
         }
         Integer loginUserId = (int) request.getSession().getAttribute("loginUserId");
@@ -117,7 +118,7 @@ public class AdminController {
     @ResponseBody
     public String nameUpdate(HttpServletRequest request, @RequestParam("loginUserName") String loginUserName,
                              @RequestParam("nickName") String nickName) {
-        if (StringUtils.isEmpty(loginUserName) || StringUtils.isEmpty(nickName)) {
+        if (!StringUtils.hasText(loginUserName) || !StringUtils.hasText(nickName)) {
             return "参数不能为空";
         }
         Integer loginUserId = (int) request.getSession().getAttribute("loginUserId");
